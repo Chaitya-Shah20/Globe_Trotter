@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
+import { TripListManager } from "@/components/trips/trip-list-manager"
 import Link from "next/link"
 import { format } from "date-fns"
 import {
