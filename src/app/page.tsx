@@ -23,32 +23,19 @@ import {
   SlidersHorizontal,
 } from "lucide-react"
 
-export default async function HomePage() {
+import { redirect } from "next/navigation"
+import { GlobeTrotterLogo } from "@/components/layout/logo"
+
+export default async function Home() {
   let session = null
   let dbTrips: any[] = []
   let dbCities: any[] = []
 
   try {
-    session = await getServerSession(authOptions)
-    if (session?.user?.id) {
-      dbTrips = await prisma.trip.findMany({
-        where: { ownerId: session.user.id },
-        orderBy: { startDate: "asc" },
-        take: 3,
-        include: {
-          stops: {
-            orderBy: { order: "asc" },
-            include: { city: true },
-          },
-          expenses: true,
-        },
-      })
+    session = await getServerSession()
+    if (session?.user) {
+      redirect("/dashboard")
     }
-
-    dbCities = await prisma.city.findMany({
-      orderBy: { popularityScore: "desc" },
-      take: 4,
-    })
   } catch (e) {
     // Graceful fallback if database is loading
   }
@@ -169,7 +156,7 @@ export default async function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 font-sans antialiased overflow-x-hidden -mt-[104px]">
       {/* ========================================================================= */}
       {/* 1. HERO SECTION WITH CINEMATIC TRAVEL BACKGROUND                          */}
       {/* ========================================================================= */}
@@ -187,13 +174,19 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/75 to-[#09090b]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/30 via-black/60 to-black/90 pointer-events-none" />
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-16 flex-1 flex flex-col justify-center">
-          <div className="max-w-3xl space-y-6">
-            {/* Top Minimal Badge */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-700/60 backdrop-blur-md text-xs font-mono tracking-[0.2em] text-zinc-300 uppercase shadow-2xl animate-in fade-in duration-700">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span>Multi-City Travel Planning Platform</span>
+        {/* Header has been extracted to global navbar */}
+
+        {/* ----------------------------------------------------------------------- */}
+        {/* HERO COPY & CALL TO ACTIONS                                            */}
+        {/* ----------------------------------------------------------------------- */}
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 my-auto w-full">
+          <div className="max-w-3xl space-y-8">
+            {/* Subtle Editorial Pill */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-white/15 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="text-[11px] font-mono tracking-[0.2em] text-zinc-300 uppercase">
+                Intelligent Multi-City Platform
+              </span>
             </div>
 
             {/* Main Headline */}
