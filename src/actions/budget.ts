@@ -30,7 +30,7 @@ export async function updateTripBudget(tripId: string, budget: number | null) {
 
     await prisma.trip.update({
       where: { id: tripId },
-      data: { totalBudget: budget }
+      data: { budget: budget }
     })
 
     revalidatePath(`/trips/${tripId}`)

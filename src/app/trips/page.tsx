@@ -136,7 +136,7 @@ function GlobeTrotterLogo({ className = "w-7 h-7" }: { className?: string }) {
 // Fallback high-resolution travel photography
 function getTripCoverImage(trip: {
   coverImage?: string | null
-  stops?: Array<{ city?: { name?: string } }>
+  stops?: Array<{ city?: { name?: string } | null }>
 }) {
   if (trip.coverImage) return trip.coverImage
 
@@ -328,8 +328,9 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
       const descMatch = trip.description?.toLowerCase().includes(searchQuery)
       const stopMatch = trip.stops.some(
         (s) =>
-          s.city.name.toLowerCase().includes(searchQuery) ||
-          s.city.country.toLowerCase().includes(searchQuery)
+          s.city?.name?.toLowerCase().includes(searchQuery) ||
+          s.city?.country?.toLowerCase().includes(searchQuery) ||
+          s.cityName?.toLowerCase().includes(searchQuery)
       )
       return nameMatch || descMatch || stopMatch
     }
@@ -665,7 +666,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
                 // Route description from stops
                 const routeDescription =
                   trip.stops && trip.stops.length > 0
-                    ? trip.stops.map((s) => s.city.name).join(" → ")
+                    ? trip.stops.map((s) => s.city?.name || "Unknown").join(" → ")
                     : "Multi-City Expedition"
 
                 const stopsCountText =
@@ -743,7 +744,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
                               key={stop.id}
                               className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-zinc-100 text-zinc-700 border border-zinc-200/70"
                             >
-                              {stop.city.name}
+                              {stop.city?.name || "Unknown"}
                             </span>
                           ))}
                           {trip.stops.length > 3 && (

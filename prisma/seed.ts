@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import prisma from '../src/lib/db'
 import { hash } from 'bcryptjs'
 
@@ -140,6 +139,11 @@ async function main() {
     },
   ]
 
+  await prisma.city.createMany({
+    data: citiesData,
+    skipDuplicates: true,
+  })
+
   const barcelona = await prisma.city.create({
     data: {
       name: 'Barcelona',
@@ -205,7 +209,7 @@ async function main() {
       defaultCost: 85.0,
       durationMinutes: 120,
       imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce65f4?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
 
     {
@@ -215,7 +219,7 @@ async function main() {
       defaultCost: 22.0,
       durationMinutes: 240,
       imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
 
     {
@@ -225,7 +229,7 @@ async function main() {
       defaultCost: 18.0,
       durationMinutes: 90,
       imageUrl: 'https://images.unsplash.com/photo-1550340499-a6c60fc8287c?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
 
     {
@@ -235,7 +239,7 @@ async function main() {
       defaultCost: 85.0,
       durationMinutes: 180,
       imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
     {
       name: 'Trastevere Sunset Food & Wine Journey',
@@ -320,7 +324,7 @@ async function main() {
       defaultCost: 55.0,
       durationMinutes: 120,
       imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
   })
 
@@ -332,7 +336,7 @@ async function main() {
       defaultCost: 120.0,
       durationMinutes: 150,
       imageUrl: 'https://images.unsplash.com/photo-1549877452-9c387954fbc2?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
   })
 
@@ -344,7 +348,7 @@ async function main() {
       defaultCost: 0.0,
       durationMinutes: 120,
       imageUrl: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
   })
 
@@ -356,7 +360,7 @@ async function main() {
       defaultCost: 65.0,
       durationMinutes: 120,
       imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
-      cityId: paris.id,
+      cityId: 'city_paris',
     },
   })
 
@@ -369,7 +373,7 @@ async function main() {
       defaultCost: 0.0,
       durationMinutes: 90,
       imageUrl: 'https://images.unsplash.com/photo-1583266203671-d8d890500d84?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -381,7 +385,7 @@ async function main() {
       defaultCost: 32.0,
       durationMinutes: 150,
       imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -393,7 +397,7 @@ async function main() {
       defaultCost: 45.0,
       durationMinutes: 150,
       imageUrl: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -405,7 +409,7 @@ async function main() {
       defaultCost: 38.0,
       durationMinutes: 120,
       imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -417,7 +421,7 @@ async function main() {
       defaultCost: 95.0,
       durationMinutes: 600,
       imageUrl: 'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -429,7 +433,7 @@ async function main() {
       defaultCost: 50.0,
       durationMinutes: 180,
       imageUrl: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -441,7 +445,7 @@ async function main() {
       defaultCost: 0.0,
       durationMinutes: 240,
       imageUrl: 'https://images.unsplash.com/photo-1532236204992-f5e82c22d55d?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
@@ -453,7 +457,7 @@ async function main() {
       defaultCost: 25.0,
       durationMinutes: 120,
       imageUrl: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80',
-      cityId: tokyo.id,
+      cityId: 'city_tokyo',
     },
   })
 
