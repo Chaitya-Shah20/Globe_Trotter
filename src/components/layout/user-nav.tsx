@@ -57,36 +57,32 @@ export function UserNav({ user }: UserNavProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-800" />
         <DropdownMenuGroup>
-          <Link href="/dashboard">
-            <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2">
-              <Compass className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Dashboard</span>
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/trips">
-            <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2">
-              <Map className="w-3.5 h-3.5 text-zinc-500" />
-              <span>My Trips</span>
-            </DropdownMenuItem>
-          </Link>
           <Link href="/profile">
             <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2">
               <User className="w-3.5 h-3.5 text-zinc-500" />
-              <span>User Profile</span>
+              <span>Profile Information</span>
             </DropdownMenuItem>
           </Link>
           <Link href="/profile/settings">
             <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2">
               <Settings className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Settings</span>
+              <span>Account Settings</span>
             </DropdownMenuItem>
           </Link>
-          <Link href="/admin">
-            <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2 font-medium text-zinc-950 dark:text-white">
-              <Shield className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
-              <span>Admin Dashboard</span>
+          <Link href="/profile">
+            <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2">
+              <Map className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Saved Destinations</span>
             </DropdownMenuItem>
           </Link>
+          {user.role === "ADMIN" && (
+            <Link href="/admin">
+              <DropdownMenuItem className="cursor-pointer rounded-xl text-xs gap-2 py-2 font-medium text-zinc-950 dark:text-white">
+                <Shield className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
+                <span>Admin Dashboard</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-800" />
         <DropdownMenuItem
