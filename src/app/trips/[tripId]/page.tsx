@@ -9,16 +9,18 @@ export const metadata: Metadata = {
   title: "Trip Itinerary | GlobeTrotter",
 }
 
-export default async function TripPage({ params }: { params: { tripId: string } }) {
+export default async function TripPage({ params }: { params: Promise<{ tripId: string }> }) {
   const session = await getServerSession(authOptions)
   
   if (!session || !session.user) {
     redirect("/login")
   }
-  
+
+  const { tripId } = await params
+
   const trip = await prisma.trip.findUnique({
     where: {
-      id: params.tripId,
+      id: tripId,
     },
     include: {
       stops: {
