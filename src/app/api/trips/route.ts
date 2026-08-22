@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json(trip, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: "Invalid input data", errors: error.errors }, { status: 422 })
+      return NextResponse.json({ message: "Invalid input data", errors: (error as z.ZodError).issues }, { status: 422 })
     }
 
     return NextResponse.json(

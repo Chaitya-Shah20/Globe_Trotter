@@ -35,12 +35,8 @@ const formSchema = z.object({
   }),
   description: z.string().optional(),
   dateRange: z.object({
-    from: z.date({
-      required_error: "Start date is required.",
-    }),
-    to: z.date({
-      required_error: "End date is required.",
-    }),
+    from: z.date(),
+    to: z.date(),
   }).refine((data) => data.from <= data.to, {
     message: "End date cannot be before start date.",
     path: ["to"],
@@ -132,7 +128,7 @@ export function TripForm() {
             <FormItem className="flex flex-col">
               <FormLabel>Travel Dates</FormLabel>
               <Popover>
-                <PopoverTrigger asChild>
+                <PopoverTrigger render={
                   <Button
                     variant={"outline"}
                     className={cn(
@@ -154,10 +150,9 @@ export function TripForm() {
                       <span>Select travel dates</span>
                     )}
                   </Button>
-                </PopoverTrigger>
+                } />
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
-                    initialFocus
                     mode="range"
                     defaultMonth={field.value?.from}
                     selected={{
