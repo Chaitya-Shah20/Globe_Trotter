@@ -561,10 +561,88 @@ export default function TripPage() {
     toast.success("Activity removed")
   }
 
-  // Copy share URL
-  function handleCopyShare() {
+  // Update activity handler (for timeline view)
+  async function handleUpdateActivity(activityId: string, updates: any) {
+    try {
+      await fetch(`/api/activities/${activityId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      })
+    } catch (e) {}
+
+    setTrip((prev) => ({
+      ...prev,
+      stops: prev.stops.map((stop) => ({
+        ...stop,
+        activities: stop.activities.map((act) => 
+          act.id === activityId ? { ...act, ...updates } : act
+        ),
+      })),
+    }))
+    toast.success("Activity updated")
+  }
+
+  // Reorder activities handler
+  async function handleReorderActivities(activeId: string, overId: string) {
+    setTrip((prev) => {
+      let activeStopIndex = -1
+      let activeActIndex = -1
+      let overStopIndex = -1
+      let overActIndex = -1
+
+      // Find indices
+      prev.stops.forEach((stop, sIdx) => {
+        stop.activities.forEach((act, aIdx) => {
+          if (act.id === activeId) { activeStopIndex = sIdx; activeActIndex = aIdx }
+          if (act.id === overId) { overStopIndex = sIdx; overActIndex = aIdx }
+        })
+      })
+
+      if (activeStopIndex !== -1 && overStopIndex !== -1 && activeStopIndex === overStopIndex) {
+        const newStops = [...prev.stops]
+        const stop = { ...newStops[activeStopIndex] }
+        const newActivities = [...stop.activities]
+        
+        // Move item
+        const [movedItem] = newActivities.splice(activeActIndex, 1)
+        newActivities.splice(overActIndex, 0, movedItem)
+        
+        // Update order in state and DB
+        stop.activities = newActivities
+        newStops[activeStopIndex] = stop
+        
+        // Optimistically fire PATCH for all reordered
+        newActivities.forEach((act, index) => {
+          fetch(`/api/activities/${act.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order: index }),
+          }).catch(() => {})
+        })
+        
+        return { ...prev, stops: newStops }
+      }
+      return prev
+    })
+  }
+
+  // Copy share URL or use native share API
+  async function handleCopyShare() {
     if (typeof window !== "undefined") {
       const shareUrl = `${window.location.origin}/share/${trip.shareToken || trip.id}`
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: trip.name || "Shared Itinerary",
+            text: "Check out this travel itinerary!",
+            url: shareUrl,
+          })
+          return
+        } catch (err) {
+          // Fallback to copy
+        }
+      }
       navigator.clipboard.writeText(shareUrl)
       setCopiedShare(true)
       toast.success("Public itinerary link copied to clipboard!")
@@ -1344,6 +1422,8 @@ export default function TripPage() {
             startDate={trip.startDate}
             endDate={trip.endDate}
             stops={trip.stops}
+            onUpdateActivity={handleUpdateActivity}
+            onReorderActivities={handleReorderActivities}
           />
         )}
       </main>

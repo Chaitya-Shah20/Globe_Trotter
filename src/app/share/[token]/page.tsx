@@ -175,10 +175,24 @@ export default function PublicSharePage() {
     loadPublicTrip()
   }, [token])
 
-  // Copy share URL
-  function handleShareLink() {
+  // Copy share URL or use native share API
+  async function handleShareLink() {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href)
+      const url = window.location.href
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: trip?.name || "Shared Itinerary",
+            text: "Check out this travel itinerary!",
+            url,
+          })
+          return
+        } catch (err) {
+          // If user cancels or it fails, fallback to copy
+        }
+      }
+      
+      navigator.clipboard.writeText(url)
       setCopied(true)
       toast.success("Public itinerary link copied!")
       setTimeout(() => setCopied(false), 2500)

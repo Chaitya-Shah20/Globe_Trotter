@@ -6,6 +6,7 @@ import * as z from "zod"
 
 const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
+  email: z.string().email().optional(),
   image: z.string().optional(),
   language: z.string().optional(),
   currency: z.string().optional(),
@@ -61,6 +62,7 @@ export async function PUT(req: Request) {
       where: { id: session.user.id },
       data: {
         ...(validated.name && { name: validated.name.trim() }),
+        ...(validated.email && { email: validated.email.trim().toLowerCase() }),
         ...(validated.image !== undefined && { image: validated.image }),
         preferences: {
           upsert: {

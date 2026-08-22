@@ -88,6 +88,7 @@ export function ProfileSettingsForm({ initialUser }: ProfileSettingsFormProps) {
 
   // Profile Form States
   const [name, setName] = useState(initialUser.name || "")
+  const [email, setEmail] = useState(initialUser.email || "")
   const [imageUrl, setImageUrl] = useState(initialUser.image || "")
   const [currency, setCurrency] = useState(initialUser.preferences?.currency || "USD")
   const [language, setLanguage] = useState(initialUser.preferences?.language || "en")
@@ -123,11 +124,12 @@ export function ProfileSettingsForm({ initialUser }: ProfileSettingsFormProps) {
 
     setIsSavingProfile(true)
     try {
-      const res = await fetch("/api/user", {
-        method: "PATCH",
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          email: email.trim() || undefined,
           image: imageUrl.trim() || null,
           currency,
           language,
@@ -143,6 +145,7 @@ export function ProfileSettingsForm({ initialUser }: ProfileSettingsFormProps) {
       // Sync NextAuth session client-side
       await updateSession({
         name: name.trim(),
+        email: email.trim() || undefined,
         image: imageUrl.trim() || null,
       })
       router.refresh()
@@ -349,18 +352,18 @@ export function ProfileSettingsForm({ initialUser }: ProfileSettingsFormProps) {
               <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="text-xs font-mono uppercase tracking-wider text-zinc-700 font-semibold flex items-center justify-between"
+                  className="text-xs font-mono uppercase tracking-wider text-zinc-700 font-semibold"
                 >
-                  <span>Email Address</span>
-                  <span className="text-[10px] text-zinc-400 font-normal lowercase">(read-only)</span>
+                  Email Address
                 </label>
                 <div className="relative">
                   <input
                     id="email"
                     type="email"
-                    value={initialUser.email || ""}
-                    disabled
-                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-100/70 border border-zinc-200 text-sm text-zinc-500 cursor-not-allowed font-mono"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-950 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-950/10 focus:border-zinc-950 transition-all"
                   />
                   <Mail className="w-4 h-4 text-zinc-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
                 </div>
