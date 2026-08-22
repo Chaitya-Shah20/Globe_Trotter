@@ -340,65 +340,6 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
 
   return (
     <div className="min-h-screen bg-zinc-50/60 text-zinc-900 selection:bg-zinc-950 selection:text-white font-sans antialiased pb-24">
-      {/* ========================================================================= */}
-      {/* 1. TOP NAVIGATION / HEADER (Consistent with Home Page)                    */}
-      {/* ========================================================================= */}
-      <div className="w-full border-b border-zinc-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Brand Logo */}
-            <Link href="/" className="hover:opacity-85 transition-opacity">
-              <GlobeTrotterLogo />
-            </Link>
-
-            {/* Navigation Center */}
-            <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.18em] font-medium text-zinc-600 font-mono">
-              <Link
-                href="/dashboard"
-                className="hover:text-zinc-950 transition-colors duration-200 py-1"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/trips"
-                className="text-zinc-950 font-semibold py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-zinc-950 after:scale-x-100"
-              >
-                My Trips
-              </Link>
-              <Link
-                href="/discover"
-                className="hover:text-zinc-950 transition-colors duration-200 py-1"
-              >
-                Discover
-              </Link>
-            </nav>
-
-            {/* Right User & CTA Actions */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Link
-                href="/trips/new"
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-950 text-white font-mono text-xs uppercase tracking-wider font-semibold hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Plan Trip</span>
-              </Link>
-
-              <div className="h-4 w-[1px] bg-zinc-200 hidden sm:block" />
-
-              <Link
-                href="/profile"
-                className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl bg-zinc-100 border border-zinc-200 hover:border-zinc-400 hover:bg-zinc-200/60 transition-all text-xs font-medium text-zinc-800"
-                title="View Profile"
-              >
-                <div className="w-6 h-6 rounded-lg bg-zinc-950 text-white flex items-center justify-center font-bold text-xs uppercase font-mono">
-                  {travelerName.charAt(0)}
-                </div>
-                <span className="hidden sm:inline text-zinc-900 font-medium">{travelerName}</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* 2. PAGE HEADER & PRIMARY CTA                                             */}
