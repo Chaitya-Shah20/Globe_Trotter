@@ -30,84 +30,16 @@ import {
   Share2
 } from "lucide-react"
 
-// Professional Inline GlobeTrotter Logo Component
-function GlobeTrotterLogo({ className = "w-7 h-7" }: { className?: string }) {
-  return (
-    <div className="flex items-center gap-3 group cursor-pointer">
-      <div className="relative flex items-center justify-center">
-        <svg
-          viewBox="0 0 40 40"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={className}
-          aria-label="GlobeTrotter Emblem"
-        >
-          {/* Outer Ring */}
-          <circle
-            cx="20"
-            cy="20"
-            r="17"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            className="text-white opacity-95 transition-opacity group-hover:opacity-100"
-          />
-          {/* Latitude & Longitude Geometrics */}
-          <ellipse
-            cx="20"
-            cy="20"
-            rx="8"
-            ry="17"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeDasharray="2.5 2.5"
-            className="text-zinc-400 opacity-70"
-          />
-          <line
-            x1="3"
-            y1="20"
-            x2="37"
-            y2="20"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeDasharray="2.5 2.5"
-            className="text-zinc-500 opacity-70"
-          />
-          {/* Dynamic Travel Trajectory Route */}
-          <path
-            d="M8 27 C13 11, 25 9, 32 13"
-            stroke="white"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          />
-          {/* Origin and Destination Pin Nodes */}
-          <circle cx="8" cy="27" r="2.25" fill="white" />
-          <circle cx="32" cy="13" r="2.75" fill="white" />
-          <circle
-            cx="32"
-            cy="13"
-            r="5.5"
-            stroke="white"
-            strokeWidth="0.75"
-            className="animate-ping opacity-75"
-          />
-        </svg>
-      </div>
-      <div className="flex flex-col">
-        <span className="text-sm font-bold tracking-[0.24em] text-white uppercase select-none font-mono">
-          GLOBETROTTER
-        </span>
-        <span className="text-[9px] tracking-[0.2em] text-zinc-400 uppercase -mt-0.5 select-none font-sans">
-          Expedition OS
-        </span>
-      </div>
-    </div>
-  )
-}
+import { redirect } from "next/navigation"
+import { GlobeTrotterLogo } from "@/components/layout/logo"
 
 export default async function Home() {
   let session = null
   try {
     session = await getServerSession()
+    if (session?.user) {
+      redirect("/dashboard")
+    }
   } catch (e) {
     // Graceful fallback if auth provider is not configured
   }
@@ -228,7 +160,7 @@ export default async function Home() {
   const displayTrips = curatedUpcomingJourneys
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 font-sans antialiased overflow-x-hidden -mt-[104px]">
       {/* ========================================================================= */}
       {/* 1. HERO SECTION WITH CINEMATIC BACKGROUND & INTEGRATED HEADER           */}
       {/* ========================================================================= */}
@@ -246,80 +178,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/75 to-[#09090b]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/30 via-black/60 to-black/90 pointer-events-none" />
 
-        {/* ----------------------------------------------------------------------- */}
-        {/* HEADER / NAVIGATION OVER HERO                                          */}
-        {/* ----------------------------------------------------------------------- */}
-        <header className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <div className="flex items-center justify-between py-3 px-5 sm:px-6 rounded-2xl bg-zinc-950/70 backdrop-blur-xl border border-white/10 shadow-2xl">
-            {/* Left: GlobeTrotter Brand Logo */}
-            <Link href="/" className="hover:opacity-90 transition-opacity">
-              <GlobeTrotterLogo />
-            </Link>
-
-            {/* Center: Minimal Navigation */}
-            <nav className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.18em] font-medium text-zinc-300 font-mono">
-              <Link
-                href="/dashboard"
-                className="hover:text-white transition-colors duration-200 py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-white after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/trips"
-                className="hover:text-white transition-colors duration-200 py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-white after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
-              >
-                My Trips
-              </Link>
-              <Link
-                href="/discover"
-                className="hover:text-white transition-colors duration-200 py-1 relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-white after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
-              >
-                Discover
-              </Link>
-            </nav>
-
-            {/* Right: Notifications & User Profile */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              <button
-                type="button"
-                aria-label="Notifications"
-                className="relative p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all"
-              >
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-white ring-2 ring-zinc-950" />
-              </button>
-
-              <div className="h-4 w-[1px] bg-zinc-800 hidden sm:block" />
-
-              {session ? (
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl bg-zinc-900/90 border border-white/10 hover:border-white/30 hover:bg-zinc-800 transition-all text-xs font-medium"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-zinc-100 text-zinc-950 flex items-center justify-center font-bold text-xs uppercase">
-                    {travelerName.charAt(0)}
-                  </div>
-                  <span className="hidden sm:inline text-zinc-200">{travelerName}</span>
-                </Link>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Link
-                    href="/login"
-                    className="text-xs tracking-wider uppercase font-mono text-zinc-300 hover:text-white px-3 py-1.5 transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="text-xs tracking-wider uppercase font-mono bg-white text-zinc-950 px-3.5 py-1.5 rounded-xl font-semibold hover:bg-zinc-200 transition-all"
-                  >
-                    Join
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        {/* Header has been extracted to global navbar */}
 
         {/* ----------------------------------------------------------------------- */}
         {/* HERO COPY & CALL TO ACTIONS                                            */}

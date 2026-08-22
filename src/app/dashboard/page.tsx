@@ -38,24 +38,19 @@ export default async function DashboardPage() {
     },
   })
 
-  // Fetch recommended destinations (mocked via db or hardcoded if empty)
+  // Fetch recommended destinations
   const popularCities = await prisma.city.findMany({
     orderBy: {
-      costIndex: "desc", // Just arbitrary ordering for recommendations
+      costIndex: "desc",
     },
     take: 4,
   })
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {session.user.name?.split(" ")[0]}!</h1>
-          <p className="text-muted-foreground">Here is an overview of your upcoming adventures.</p>
-        </div>
-      </div>
-      
-      <DashboardContent upcomingTrips={upcomingTrips} popularCities={popularCities} />
-    </div>
+    <DashboardContent 
+      upcomingTrips={upcomingTrips} 
+      popularCities={popularCities} 
+      userName={session.user.name || "Traveler"} 
+    />
   )
 }
