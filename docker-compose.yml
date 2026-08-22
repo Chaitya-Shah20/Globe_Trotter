@@ -1,8 +1,30 @@
-version: '3.8'
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: globetrotter-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://globetrotter:password@db:5432/globetrotter_db?schema=public
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    # We use sh -c to ensure we can pass the hostname argument properly to Next.js
+    command: sh -c "npx prisma generate && npm run dev -- -H 0.0.0.0"
+
   db:
     image: postgres:15-alpine
-    restart: always
+    container_name: globetrotter-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: globetrotter
       POSTGRES_PASSWORD: password
@@ -11,6 +33,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U globetrotter -d globetrotter_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:
