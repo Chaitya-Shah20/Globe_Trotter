@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String             @id @default(cuid())
+  name             String?
+  email            String?            @unique
+  emailVerified    DateTime?
+  image            String?
+  password         String?
+  role             Role               @default(USER)
+  preferences      UserPreference?
+  trips            Trip[]             @relation("UserTrips")
+  savedDestinations SavedDestination[]
+  accounts         Account[]
+  sessions         Session[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model UserPreference {
+  id       String @id @default(cuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency String @default("USD")
+  language String @default("en")
+}
+
+model Trip {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  coverImage  String?
+  isPublic    Boolean      @default(false)
+  ownerId     String
+  owner       User         @relation("UserTrips", fields: [ownerId], references: [id], onDelete: Cascade)
+  stops       TripStop[]
+  members     TripMember[]
+  shares      TripShare[]
+  expenses    Expense[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model TripMember {
+  id     String @id @default(cuid())
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  userId String // For future, link to User if registered
+  role   String @default("EDITOR")
+}
+
+model TripStop {
+  id           String         @id @default(cuid())
+  tripId       String
+  trip         Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  cityId       String
+  city         City           @relation(fields: [cityId], references: [id])
+  arrivalDate  DateTime
+  departureDate DateTime
+  order        Int            @default(0)
+  days         ItineraryDay[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model City {
+  id               String             @id @default(cuid())
+  name             String
+  country          String
+  lat              Float
+  lng              Float
+  costIndex        Int                @default(2) // 1-5 scale
+  imageUrl         String?
+  activities       Activity[]
+  stops            TripStop[]
+  savedDestinations SavedDestination[]
+}
+
+model Activity {
+  id               String              @id @default(cuid())
+  name             String
+  description      String?
+  type             String              // e.g., TRANSPORT, ACCOMMODATION, SIGHTSEEING, MEAL
+  defaultCost      Float               @default(0.0)
+  durationMinutes  Int                 @default(60)
+  imageUrl         String?
+  cityId           String
+  city             City                @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  itineraryItems   ItineraryActivity[]
+}
+
+model ItineraryDay {
+  id         String              @id @default(cuid())
+  date       DateTime
+  stopId     String
+  stop       TripStop            @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  activities ItineraryActivity[]
+}
+
+model ItineraryActivity {
+  id             String       @id @default(cuid())
+  dayId          String
+  day            ItineraryDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  activityId     String
+  activity       Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  startTime      DateTime?
+  endTime        DateTime?
+  customCost     Float?
+  order          Int          @default(0)
+  notes          String?
+  expenses       Expense[]
+}
+
+model Expense {
+  id                  String             @id @default(cuid())
+  tripId              String
+  trip                Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  itineraryActivityId String?
+  itineraryActivity   ItineraryActivity? @relation(fields: [itineraryActivityId], references: [id], onDelete: SetNull)
+  amount              Float
+  currency            String             @default("USD")
+  category            String             // transport, accommodation, activities, meals, other
+  description         String
+  date                DateTime
+  createdAt           DateTime           @default(now())
+}
+
+model SavedDestination {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cityId    String
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, cityId])
+}
+
+model TripShare {
+  id        String   @id @default(cuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  token     String   @unique // public URL token
+  createdAt DateTime @default(now())
+}
+
+// NextAuth Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
