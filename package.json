@@ -44,15 +44,15 @@
     "@prisma/config": "^7.9.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
+    "@types/node": "20.19.43",
     "@types/pg": "^8.23.1",
-    "@types/react": "^19",
+    "@types/react": "19.2.18",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
-    "typescript": "^5"
+    "typescript": "5.9.3"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
