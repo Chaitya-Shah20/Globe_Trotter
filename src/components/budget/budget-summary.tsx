@@ -123,7 +123,7 @@ export function BudgetSummary({ trip }: { trip: any }) {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <RechartsTooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                    <RechartsTooltip formatter={(value: any) => `$${Number(value).toFixed(2)}`} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>

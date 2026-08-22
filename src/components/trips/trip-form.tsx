@@ -27,7 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { toast } from "@/components/ui/toast"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -80,19 +80,12 @@ export function TripForm() {
 
       const trip = await response.json()
       
-      toast({
-        title: "Success!",
-        description: "Your trip has been created.",
-      })
+      toast.success("Your trip has been created.")
       
       router.push(`/trips/${trip.id}`)
       router.refresh()
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem creating your trip.",
-      })
+      toast.error("There was a problem creating your trip.")
       setIsLoading(false)
     }
   }

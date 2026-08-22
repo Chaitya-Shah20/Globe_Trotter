@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/toast"
+import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
@@ -47,18 +47,11 @@ export function LoginForm() {
     setIsLoading(false)
 
     if (result?.error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid email or password",
-      })
+      toast.error("Invalid email or password")
       return
     }
 
-    toast({
-      title: "Success",
-      description: "Logged in successfully",
-    })
+    toast.success("Logged in successfully")
     
     router.push("/dashboard")
     router.refresh()

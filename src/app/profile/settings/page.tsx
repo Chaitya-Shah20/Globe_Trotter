@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { toast } from "@/components/ui/toast"
+import { toast } from "sonner"
 import { Loader2, AlertTriangle } from "lucide-react"
 
 export default function SettingsPage() {
@@ -29,17 +29,10 @@ export default function SettingsPage() {
       const res = await fetch("/api/user", { method: "DELETE" })
       if (!res.ok) throw new Error("Failed to delete account")
       
-      toast({
-        title: "Account deleted",
-        description: "Your account has been permanently deleted.",
-      })
+      toast.success("Account deleted")
       signOut({ callbackUrl: "/" })
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete account. Please try again.",
-      })
+      toast.error("Failed to delete account. Please try again.")
       setIsDeleting(false)
     }
   }

@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/toast"
+import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
@@ -64,19 +64,12 @@ export function SignupForm() {
         throw new Error(result.error)
       }
 
-      toast({
-        title: "Success",
-        description: "Account created successfully",
-      })
+      toast.success("Account created successfully")
       
       router.push("/dashboard")
       router.refresh()
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      })
+      toast.error(error.message)
     } finally {
       setIsLoading(false)
     }
