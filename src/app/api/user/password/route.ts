@@ -10,7 +10,7 @@ const updatePasswordSchema = z.object({
   newPassword: z.string().min(6, "New password must be at least 6 characters"),
 })
 
-export async function PUT(req: Request) {
+export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -19,34 +19,51 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json()
-    const { currentPassword, newPassword } = updatePasswordSchema.parse(body)
+    const parsed = updatePasswordSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { message: parsed.error.issues[0]?.message || "Invalid input data" },
+        { status: 422 }
+      )
+    }
+
+    const { currentPassword, newPassword } = parsed.data
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
     })
 
     if (!user || !user.password) {
-      return NextResponse.json({ message: "User not found or password not set" }, { status: 400 })
+      return NextResponse.json(
+        { message: "Cannot change password for this account." },
+        { status: 400 }
+      )
     }
 
-    const isValid = await compare(currentPassword, user.password)
-    if (!isValid) {
-      return NextResponse.json({ message: "Incorrect current password" }, { status: 400 })
+    const isMatch = await compare(currentPassword, user.password)
+    if (!isMatch) {
+      return NextResponse.json(
+        { message: "Incorrect current password" },
+        { status: 400 }
+      )
     }
 
-    const hashedPassword = await hash(newPassword, 12)
+    const hashedPassword = await hash(newPassword, 10)
 
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { password: hashedPassword },
+      data: {
+        password: hashedPassword,
+      },
     })
 
-    return NextResponse.json({ message: "Password updated successfully" })
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: "Invalid input", errors: error.issues }, { status: 422 })
-    }
-    console.error("Change password error:", error)
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ message: "Password updated successfully" }, { status: 200 })
+  } catch (error) {
+    console.error("Failed to update password:", error)
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    )
   }
 }

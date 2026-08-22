@@ -1,4 +1,9 @@
-"use client"
+import { Metadata } from "next"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import prisma from "@/lib/db"
+import { ProfileSettingsForm } from "@/components/profile/profile-settings-form"
 
 import { useState } from "react"
 import { useSession, signOut } from "next-auth/react"
