@@ -670,19 +670,6 @@ export default function TripPage() {
             <div className="inline-flex p-1 bg-zinc-100 rounded-xl border border-zinc-200 text-xs font-mono">
               <button
                 type="button"
-                onClick={() => setActiveTab("builder")}
-                className={`px-3 py-1.5 rounded-lg uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                  activeTab === "builder"
-                    ? "bg-zinc-950 text-white font-semibold shadow-2xs"
-                    : "text-zinc-600 hover:text-zinc-950"
-                }`}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>Builder</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setActiveTab("view")}
                 className={`px-3 py-1.5 rounded-lg uppercase tracking-wider transition-all flex items-center gap-1.5 ${
                   activeTab === "view"
@@ -691,20 +678,20 @@ export default function TripPage() {
                 }`}
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>View</span>
+                <span>Overview</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setActiveTab("budget")}
+                onClick={() => setActiveTab("builder")}
                 className={`px-3 py-1.5 rounded-lg uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                  activeTab === "budget"
+                  activeTab === "builder"
                     ? "bg-zinc-950 text-white font-semibold shadow-2xs"
                     : "text-zinc-600 hover:text-zinc-950"
                 }`}
               >
-                <Wallet className="w-3.5 h-3.5" />
-                <span>Budget</span>
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Itinerary</span>
               </button>
 
               <button
@@ -718,6 +705,19 @@ export default function TripPage() {
               >
                 <CalendarDays className="w-3.5 h-3.5" />
                 <span>Calendar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("budget")}
+                className={`px-3 py-1.5 rounded-lg uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                  activeTab === "budget"
+                    ? "bg-zinc-950 text-white font-semibold shadow-2xs"
+                    : "text-zinc-600 hover:text-zinc-950"
+                }`}
+              >
+                <Wallet className="w-3.5 h-3.5" />
+                <span>Budget</span>
               </button>
             </div>
 

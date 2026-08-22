@@ -174,13 +174,12 @@ async function main() {
   })
 
   // ─── PARIS ACTIVITIES (8) ───
-  const eiffel = await prisma.activity.create({
-    data: {
+  const activitiesData = [
+    {
       name: 'Eiffel Tower Tour',
       description: 'Ascend to the summit of the iconic iron lattice tower for breathtaking panoramic views of Paris, the Seine, and beyond.',
       type: 'SIGHTSEEING',
       category: 'Sightseeing',
-      description: 'Ascend to the summit for breathtaking 360-degree panoramic views of Paris.',
       defaultCost: 45.0,
       durationMinutes: 150,
       durationText: '2.5 hrs',
@@ -208,10 +207,8 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce65f4?auto=format&fit=crop&w=800&q=80',
       cityId: paris.id,
     },
-  })
 
-  await prisma.activity.create({
-    data: {
+    {
       name: 'Louvre Museum',
       description: 'Explore the world\'s largest art museum housing the Mona Lisa, Venus de Milo, and over 380,000 objects across 60,600 sqm.',
       type: 'SIGHTSEEING',
@@ -220,10 +217,8 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80',
       cityId: paris.id,
     },
-  })
 
-  await prisma.activity.create({
-    data: {
+    {
       name: 'Seine River Cruise',
       description: 'Glide past illuminated landmarks on an evening boat cruise through the heart of Paris.',
       type: 'SIGHTSEEING',
@@ -232,10 +227,8 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1550340499-a6c60fc8287c?auto=format&fit=crop&w=800&q=80',
       cityId: paris.id,
     },
-  })
 
-  await prisma.activity.create({
-    data: {
+    {
       name: 'Le Marais Food Tour',
       description: 'Taste authentic French pastries, aged cheeses, charcuterie, and wine in one of Paris\'s most vibrant neighborhoods.',
       type: 'FOOD',
