@@ -50,6 +50,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Invalid input data" }, { status: 422 })
     }
 
+    console.error("[SIGNUP_ERROR]", error)
+
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
