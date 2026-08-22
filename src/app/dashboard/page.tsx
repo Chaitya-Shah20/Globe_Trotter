@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/db"
 import Link from "next/link"
+import { DashboardContent } from "@/components/dashboard/dashboard-content"
 import { Plus, Calendar, MapPin, ArrowRight, Wallet, Compass, Plane, Route, Star } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
     })
 
     popularCities = await prisma.city.findMany({
-      orderBy: { popularityScore: "desc" },
+      orderBy: { costIndex: "desc" },
       take: 4,
     })
   } catch (e) {
@@ -44,14 +45,6 @@ export default async function DashboardPage() {
 
   const upcomingTrips = userTrips.filter((t) => new Date(t.endDate) >= new Date())
   const pastTrips = userTrips.filter((t) => new Date(t.endDate) < new Date())
-
-  // Fetch recommended destinations
-  const popularCities = await prisma.city.findMany({
-    orderBy: {
-      costIndex: "desc",
-    },
-    take: 4,
-  })
 
   return (
     <DashboardContent 
