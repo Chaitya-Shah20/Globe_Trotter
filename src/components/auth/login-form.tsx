@@ -2,95 +2,123 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
-
-const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-})
+import { Loader2, ArrowRight, Lock, Mail, Check } from "lucide-react"
 
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+
+  const [email, setEmail] = useState("demo@globetrotter.app")
+  const [password, setPassword] = useState("password123")
+  const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  })
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    const result = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    })
-
-    setIsLoading(false)
-
-    if (result?.error) {
-      toast.error("Invalid email or password")
+    if (!email.trim() || !password) {
+      toast.error("Please enter email and password.")
       return
     }
 
-    toast.success("Logged in successfully")
-    
-    router.push("/dashboard")
-    router.refresh()
+    setIsLoading(true)
+
+    try {
+      const result = await signIn("credentials", {
+        email: email.toLowerCase().trim(),
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        toast.error("Invalid email or password.")
+        setIsLoading(false)
+        return
+      }
+
+      toast.success("Welcome back to GlobeTrotter!")
+      router.push(callbackUrl)
+      router.refresh()
+    } catch (error: any) {
+      toast.error("An unexpected error occurred during login.")
+      setIsLoading(false)
+    }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="name@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Sign In
-        </Button>
-      </form>
-    </Form>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="text-xs font-mono uppercase tracking-wider text-zinc-700 font-semibold block">
+          Email Address
+        </label>
+        <div className="relative">
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <input
+            type="email"
+            required
+            placeholder="demo@globetrotter.app"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-300 bg-white text-xs text-zinc-950 focus:outline-hidden focus:ring-2 focus:ring-zinc-950 font-sans shadow-2xs"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-mono uppercase tracking-wider text-zinc-700 font-semibold block">
+            Password
+          </label>
+          <a
+            href="/forgot-password"
+            className="text-[11px] font-mono text-zinc-500 hover:text-zinc-950 hover:underline"
+          >
+            Forgot password?
+          </a>
+        </div>
+        <div className="relative">
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <input
+            type="password"
+            required
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-zinc-300 bg-white text-xs font-mono text-zinc-950 focus:outline-hidden focus:ring-2 focus:ring-zinc-950 shadow-2xs"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-1">
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="w-4 h-4 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
+          />
+          <span className="text-xs text-zinc-600 font-sans">Remember this device</span>
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full h-11 rounded-xl bg-zinc-950 text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-xs hover:bg-zinc-800 active:scale-98 transition-all flex items-center justify-center gap-2 mt-2"
+      >
+        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+        <span>{isLoading ? "Authenticating..." : "Sign In"}</span>
+      </button>
+
+      {/* Demo Credentials Callout */}
+      <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 text-left font-mono text-[11px] text-zinc-600 space-y-1">
+        <span className="font-bold text-zinc-900 block uppercase">Demo Credentials:</span>
+        <div className="text-zinc-500">Email: <strong className="text-zinc-900">demo@globetrotter.app</strong></div>
+        <div className="text-zinc-500">Password: <strong className="text-zinc-900">password123</strong></div>
+      </div>
+    </form>
   )
 }

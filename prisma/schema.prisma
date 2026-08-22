@@ -7,20 +7,20 @@ datasource db {
 }
 
 model User {
-  id               String             @id @default(cuid())
-  name             String?
-  email            String?            @unique
-  emailVerified    DateTime?
-  image            String?
-  password         String?
-  role             Role               @default(USER)
-  preferences      UserPreference?
-  trips            Trip[]             @relation("UserTrips")
+  id                String             @id @default(cuid())
+  name              String?
+  email             String?            @unique
+  emailVerified     DateTime?
+  image             String?
+  password          String?
+  role              Role               @default(USER)
+  preferences       UserPreference?
+  trips             Trip[]             @relation("UserTrips")
   savedDestinations SavedDestination[]
-  accounts         Account[]
-  sessions         Session[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  accounts          Account[]
+  sessions          Session[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 enum Role {
@@ -42,8 +42,10 @@ model Trip {
   description String?
   startDate   DateTime
   endDate     DateTime
+  budget      Float?       @default(0.0)
   coverImage  String?
   isPublic    Boolean      @default(false)
+  shareToken  String?      @unique @default(cuid())
   ownerId     String
   owner       User         @relation("UserTrips", fields: [ownerId], references: [id], onDelete: Cascade)
   stops       TripStop[]
@@ -58,48 +60,57 @@ model TripMember {
   id     String @id @default(cuid())
   tripId String
   trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  userId String // For future, link to User if registered
+  userId String
   role   String @default("EDITOR")
 }
 
 model TripStop {
-  id           String         @id @default(cuid())
-  tripId       String
-  trip         Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  cityId       String
-  city         City           @relation(fields: [cityId], references: [id])
-  arrivalDate  DateTime
+  id            String         @id @default(cuid())
+  tripId        String
+  trip          Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  cityId        String?
+  city          City?          @relation(fields: [cityId], references: [id])
+  cityName      String?
+  country       String?
+  arrivalDate   DateTime
   departureDate DateTime
-  order        Int            @default(0)
-  days         ItineraryDay[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  order         Int            @default(0)
+  notes         String?
+  estimatedCost Float?         @default(0.0)
+  days          ItineraryDay[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model City {
-  id               String             @id @default(cuid())
-  name             String
-  country          String
-  lat              Float
-  lng              Float
-  costIndex        Int                @default(2) // 1-5 scale
-  imageUrl         String?
-  activities       Activity[]
-  stops            TripStop[]
+  id                String             @id @default(cuid())
+  name              String
+  country           String
+  region            String?
+  lat               Float
+  lng               Float
+  costIndex         Int                @default(3) // 1-5 scale
+  popularityScore   Float?             @default(4.8)
+  imageUrl          String?
+  description       String?
+  activities        Activity[]
+  stops             TripStop[]
   savedDestinations SavedDestination[]
 }
 
 model Activity {
-  id               String              @id @default(cuid())
-  name             String
-  description      String?
-  type             String              // e.g., TRANSPORT, ACCOMMODATION, SIGHTSEEING, MEAL
-  defaultCost      Float               @default(0.0)
-  durationMinutes  Int                 @default(60)
-  imageUrl         String?
-  cityId           String
-  city             City                @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  itineraryItems   ItineraryActivity[]
+  id              String              @id @default(cuid())
+  name            String
+  description     String?
+  type            String              // e.g., TRANSPORT, ACCOMMODATION, SIGHTSEEING, MEAL
+  category        String?             // Sightseeing, Food, Adventure, Nature, Culture, Shopping
+  defaultCost     Float               @default(0.0)
+  durationMinutes Int                 @default(60)
+  durationText    String?             @default("2 hrs")
+  imageUrl        String?
+  cityId          String
+  city            City                @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  itineraryItems  ItineraryActivity[]
 }
 
 model ItineraryDay {
@@ -114,13 +125,17 @@ model ItineraryActivity {
   id             String       @id @default(cuid())
   dayId          String
   day            ItineraryDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  activityId     String
-  activity       Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId     String?
+  activity       Activity?    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  customName     String?
   startTime      DateTime?
   endTime        DateTime?
+  timeText       String?      @default("10:00")
   customCost     Float?
   order          Int          @default(0)
   notes          String?
+  category       String?      @default("activities")
+  location       String?
   expenses       Expense[]
 }
 
@@ -132,7 +147,7 @@ model Expense {
   itineraryActivity   ItineraryActivity? @relation(fields: [itineraryActivityId], references: [id], onDelete: SetNull)
   amount              Float
   currency            String             @default("USD")
-  category            String             // transport, accommodation, activities, meals, other
+  category            String             // transport, stay, meals, activities, other
   description         String
   date                DateTime
   createdAt           DateTime           @default(now())
@@ -159,18 +174,18 @@ model TripShare {
 
 // NextAuth Models
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
