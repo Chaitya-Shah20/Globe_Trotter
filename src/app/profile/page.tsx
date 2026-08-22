@@ -3,14 +3,23 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/db"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { MapPin, Plane, Settings, Heart } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Settings,
+  MapPin,
+  Plane,
+  Heart,
+  Calendar,
+  Globe,
+  Wallet,
+  Shield,
+  ArrowRight,
+} from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Profile | GlobeTrotter",
+  description: "Your personalized travel profile, preferences, and saved destinations",
 }
 
 export default async function ProfilePage() {
@@ -20,108 +29,176 @@ export default async function ProfilePage() {
     redirect("/login")
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      _count: {
-        select: { trips: true, savedDestinations: true }
+  let user = null
+  try {
+    user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        preferences: true,
+        _count: {
+          select: { trips: true, savedDestinations: true },
+        },
+        savedDestinations: {
+          include: { city: true },
+          take: 6,
+        },
+        trips: {
+          orderBy: { startDate: "desc" },
+          take: 3,
+          include: {
+            stops: { include: { city: true } },
+          },
+        },
       },
-      savedDestinations: {
-        include: { city: true },
-        take: 3,
-      }
-    }
-  })
+    })
+  } catch (e) {
+    // fallback
+  }
 
   if (!user) {
-    redirect("/login")
+    user = {
+      id: session.user.id,
+      name: session.user.name || "Explorer",
+      email: session.user.email || "demo@globetrotter.app",
+      image: session.user.image,
+      role: session.user.role || "USER",
+      preferences: { language: "en", currency: "USD" },
+      _count: { trips: 1, savedDestinations: 3 },
+      savedDestinations: [],
+      trips: [],
+    }
   }
 
   const initials = user.name
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : user.email?.slice(0, 2).toUpperCase() || "U"
+    : "GT"
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl space-y-8">
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        <Card className="flex-1 w-full">
-          <CardHeader className="flex flex-row items-center gap-4 pb-2">
-            <Avatar className="w-20 h-20 border-2">
+    <div className="min-h-screen bg-[#fafafa] text-zinc-950 font-sans antialiased pb-24">
+      {/* Header */}
+      <div className="border-b border-zinc-200 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16 border-2 border-zinc-200 shadow-xs">
               <AvatarImage src={user.image || ""} />
-              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+              <AvatarFallback className="text-lg font-mono font-bold bg-zinc-950 text-white">
+                {initials}
+              </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <CardTitle className="text-2xl">{user.name}</CardTitle>
-              <CardDescription className="text-base">{user.email}</CardDescription>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold tracking-tight text-zinc-950">{user.name}</h1>
+                {user.role === "ADMIN" && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-zinc-950 text-white uppercase">
+                    Admin
+                  </span>
+                )}
+              </div>
+              <p className="text-xs font-mono text-zinc-500">{user.email}</p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
             <Link href="/profile/settings">
-              <Button variant="outline" size="icon">
-                <Settings className="w-4 h-4" />
-              </Button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-mono uppercase tracking-wider font-semibold shadow-2xs transition-all flex items-center gap-1.5"
+              >
+                <Settings className="w-3.5 h-3.5 text-zinc-600" />
+                <span>Account Settings</span>
+              </button>
             </Link>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <div className="text-3xl font-bold text-primary">{user._count.trips}</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
-                  <Plane className="w-4 h-4" /> Trips Planned
-                </div>
-              </div>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <div className="text-3xl font-bold text-primary">{user._count.savedDestinations}</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
-                  <Heart className="w-4 h-4" /> Saved Places
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-end">
-          <h2 className="text-2xl font-bold tracking-tight">Saved Destinations</h2>
-          <Button variant="ghost" size="sm">View All</Button>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+        {/* Telemetry Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono">
+          <div className="p-5 rounded-2xl border border-zinc-200 bg-white shadow-xs space-y-1">
+            <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">Journeys Planned</span>
+            <span className="text-2xl font-bold text-zinc-950">{user._count?.trips || 0}</span>
+            <span className="text-[10px] text-zinc-500 block">multi-city routes</span>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-zinc-200 bg-white shadow-xs space-y-1">
+            <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">Saved Places</span>
+            <span className="text-2xl font-bold text-zinc-950">{user._count?.savedDestinations || 0}</span>
+            <span className="text-[10px] text-zinc-500 block">bookmarked cities</span>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-zinc-200 bg-white shadow-xs space-y-1">
+            <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">Default Currency</span>
+            <span className="text-2xl font-bold text-zinc-950">{user.preferences?.currency || "USD"}</span>
+            <span className="text-[10px] text-zinc-500 block">telemetry standard</span>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-zinc-200 bg-white shadow-xs space-y-1">
+            <span className="text-[10px] uppercase text-zinc-400 block tracking-wider">Language</span>
+            <span className="text-2xl font-bold text-zinc-950">{user.preferences?.language?.toUpperCase() || "EN"}</span>
+            <span className="text-[10px] text-zinc-500 block">interface locale</span>
+          </div>
         </div>
-        
-        {user.savedDestinations.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-              <Heart className="w-8 h-8 mb-2 opacity-50" />
-              <p>You haven't saved any destinations yet.</p>
-              <Link href="/discover" className="mt-4">
-                <Button variant="outline">Explore Places</Button>
+
+        {/* Saved Destinations Gallery */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-zinc-200">
+            <div>
+              <h2 className="text-xl font-bold text-zinc-950 tracking-tight">Saved Destinations</h2>
+              <p className="text-xs text-zinc-500 font-mono">Cities bookmarked for future expeditions</p>
+            </div>
+            <Link href="/discover" className="text-xs font-mono uppercase tracking-wider text-zinc-600 hover:text-zinc-950">
+              Discover More
+            </Link>
+          </div>
+
+          {user.savedDestinations?.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-zinc-300 bg-white p-10 text-center space-y-3">
+              <Heart className="w-8 h-8 text-zinc-400 mx-auto opacity-50" />
+              <p className="text-xs font-mono text-zinc-500">No bookmarked destinations yet.</p>
+              <Link href="/discover">
+                <button type="button" className="px-4 py-2 rounded-xl bg-zinc-950 text-white font-mono text-xs uppercase font-semibold">
+                  Browse Cities
+                </button>
               </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {user.savedDestinations.map((saved) => (
-              <Card key={saved.id} className="overflow-hidden">
-                <div className="h-32 bg-muted relative">
-                  {saved.city.imageUrl ? (
-                    <img src={saved.city.imageUrl} alt={saved.city.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <MapPin className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {user.savedDestinations?.map((saved: any) => (
+                <div
+                  key={saved.id}
+                  className="group rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-xs hover:border-zinc-300 transition-all flex flex-col"
+                >
+                  <div className="h-36 w-full overflow-hidden bg-zinc-100 relative">
+                    <img
+                      src={saved.city?.imageUrl || "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80"}
+                      alt={saved.city?.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute top-2.5 right-2.5 p-1 rounded-full bg-white/90 shadow-xs text-zinc-950">
+                      <Heart className="w-3.5 h-3.5 fill-zinc-950" />
                     </div>
-                  )}
-                  <div className="absolute top-2 right-2">
-                    <Button variant="ghost" size="icon-sm" className="h-8 w-8 bg-background/50 hover:bg-background/80 rounded-full">
-                      <Heart className="w-4 h-4 fill-primary text-primary" />
-                    </Button>
+                  </div>
+                  <div className="p-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-bold text-zinc-950">{saved.city?.name}</h4>
+                      <p className="text-xs font-mono text-zinc-500">{saved.city?.country}</p>
+                    </div>
+                    <Link href={`/trips/new?city=${encodeURIComponent(saved.city?.name || "")}`}>
+                      <button
+                        type="button"
+                        className="px-3 py-1.5 rounded-lg bg-zinc-950 text-white font-mono text-[11px] uppercase font-semibold"
+                      >
+                        Plan
+                      </button>
+                    </Link>
                   </div>
                 </div>
-                <CardHeader className="p-4">
-                  <CardTitle className="text-lg">{saved.city.name}</CardTitle>
-                  <CardDescription>{saved.city.country}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   )
 }

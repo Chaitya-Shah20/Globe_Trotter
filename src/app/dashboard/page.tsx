@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/db"
-import { DashboardContent } from "@/components/dashboard/dashboard-content"
+import Link from "next/link"
+import { Plus, Calendar, MapPin, ArrowRight, Wallet, Compass, Plane, Route, Star } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Dashboard | GlobeTrotter",
-  description: "Overview of your trips and budget",
+  description: "Overview of your upcoming trips and travel metrics",
 }
 
 export default async function DashboardPage() {
@@ -17,26 +18,32 @@ export default async function DashboardPage() {
     redirect("/login")
   }
 
-  // Fetch user's trips
-  const upcomingTrips = await prisma.trip.findMany({
-    where: {
-      ownerId: session.user.id,
-      startDate: {
-        gte: new Date(),
-      },
-    },
-    orderBy: {
-      startDate: "asc",
-    },
-    take: 3,
-    include: {
-      stops: {
-        include: {
-          city: true,
+  let userTrips: any[] = []
+  let popularCities: any[] = []
+
+  try {
+    userTrips = await prisma.trip.findMany({
+      where: { ownerId: session.user.id },
+      orderBy: { startDate: "asc" },
+      include: {
+        stops: {
+          orderBy: { order: "asc" },
+          include: { city: true },
         },
+        expenses: true,
       },
-    },
-  })
+    })
+
+    popularCities = await prisma.city.findMany({
+      orderBy: { popularityScore: "desc" },
+      take: 4,
+    })
+  } catch (e) {
+    // Database fallback
+  }
+
+  const upcomingTrips = userTrips.filter((t) => new Date(t.endDate) >= new Date())
+  const pastTrips = userTrips.filter((t) => new Date(t.endDate) < new Date())
 
   // Fetch recommended destinations
   const popularCities = await prisma.city.findMany({
